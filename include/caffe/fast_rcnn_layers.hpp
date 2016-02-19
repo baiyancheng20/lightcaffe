@@ -103,24 +103,20 @@ class BoundingBox {
 public:
   Dtype x1, y1, x2, y2;
   Dtype score;
-  int class_idx;
 
   BoundingBox() {
     this->x1 = 0; this->y1 = 0; this->x2 = 0; this->y2 = 0;
     this->score = 0;
-    this->class_idx = -1;
   }
 
   BoundingBox(Dtype x1, Dtype y1, Dtype x2, Dtype y2) {
     this->x1 = x1; this->y1 = y1; this->x2 = x2; this->y2 = y2;
     this->score = 0;
-    this->class_idx = -1;
   }
 
   BoundingBox(Dtype x1, Dtype y1, Dtype x2, Dtype y2, Dtype score) { 
     this->x1 = x1; this->y1 = y1; this->x2 = x2; this->y2 = y2; 
-    this->score = score; 
-    this->class_idx = -1;
+    this->score = score;
   }  
 
   bool operator<(BoundingBox other) const { return score > other.score; }

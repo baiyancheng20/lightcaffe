@@ -5,6 +5,7 @@
 // Written by Ross Girshick
 // ------------------------------------------------------------------
 
+#include <stdio.h>
 #include <cfloat>
 
 #include "caffe/fast_rcnn_layers.hpp"
@@ -83,7 +84,8 @@ void ProposalLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   nms_thresh_ = proposal_param.nms_thresh();
   min_size_ = proposal_param.min_size();
 
-  generate_anchors(base_size_, ratios_, scales_, anchors_);
+  for (int i = 0; i < proposal_param.copys(); i++)
+    generate_anchors(base_size_, ratios_, scales_, anchors_);
   num_anchors_ = anchors_.size() / 4;
 
   // rois blob : holds R regions of interest, each is a 5 - tuple
@@ -173,6 +175,30 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 			top1[i] = proposals[keep[i]].score;
 		}
 	}
+
+        FILE* fp = fopen("bottom.txt", "w");
+        for (int k = 0; k < bottom[0]->count(); ++k)
+            fprintf(fp, "%.6f\n", scores[k]);
+        fclose(fp);
+        fp = fopen("bbox.txt", "w");
+        for (int k = 0; k < bottom[1]->count(); ++k)
+            fprintf(fp, "%.6f\n", bbox_deltas[k]);
+        fclose(fp);
+        fp = fopen("im_info.txt", "w");
+        for (int k = 0; k < bottom[2]->count()+1; ++k)
+            fprintf(fp, "%.6f\n", im_info[k]);
+        fclose(fp);
+        fp = fopen("roi.txt", "w");
+        for (int k = 0; k < nproposals; ++k) {
+          for (int i = 1; i < 5; ++i)
+            fprintf(fp, "%.2f ", top0[k * 5 + i]);
+          fprintf(fp, "\n");
+        }
+        fclose(fp);
+        fp = fopen("shapes.txt", "w");
+        fprintf(fp, "scores: %d %d %d\n", bottom[0]->channels(), bottom[0]->height(), bottom[0]->width());
+        fprintf(fp, "bboxes: %d %d %d\n", bottom[1]->channels(), bottom[1]->height(), bottom[1]->width());
+        fclose(fp);
 
 	free(keep);
 	free(sorted_dets);

@@ -12,6 +12,8 @@
 #include "caffe/layer.hpp"
 #include "caffe/proto/caffe.pb.h"
 
+//#define FORWARD_CHECK
+//#define BACKWARD_CHECK
 //#define PROF_LAYERS
 namespace caffe {
 
@@ -29,7 +31,8 @@ class Net {
   explicit Net(const string& param_file, Phase phase,
       const Net* root_net = NULL);
 #else
-  explicit Net(const string& param_file, const string& pretrained_param_file);
+  explicit Net(const string& param_file, const string& pretrained_param_file, const vector<int>& gpus);
+  void Detect(const unsigned char* image_data, int width, int height, int stride, vector<pair<string, vector<Dtype> > >& boxes);
 #endif
   virtual ~Net() {}
 
@@ -93,7 +96,24 @@ class Net {
   Dtype ForwardBackward(const vector<Blob<Dtype>* > & bottom) {
     Dtype loss;
     Forward(bottom, &loss);
-    Backward();
+#ifdef FORWARD_CHECK
+	if (loss < 80) {
+#endif
+      Backward();
+#ifdef BACKWARD_CHECK
+      Dtype sumsq_diff = 0;
+      for (int i = 0; i < params_.size(); ++i) {
+        if (param_owners_[i] >= 0) { continue; }
+        sumsq_diff += params_[i]->sumsq_diff();
+      }
+      const Dtype l2norm_diff = std::sqrt(sumsq_diff);
+      if (l2norm_diff != l2norm_diff || l2norm_diff > 3.4e+38f || l2norm_diff < -3.4e+38f) {
+        loss = 80;
+      }
+#endif
+#ifdef FORWARD_CHECK
+    }
+#endif
     return loss;
   }
 
@@ -255,6 +275,11 @@ class Net {
   void BackwardDebugInfo(const int layer_id);
   /// @brief Helper for displaying debug info in Update.
   void UpdateDebugInfo(const int param_id);
+#endif
+
+#ifdef RUN_TIME
+  void SetInput(const unsigned char* data, int width, int height, int stride);
+  void GetOutput(vector<pair<string, vector<Dtype> > >& boxes);
 #endif
 
   /// @brief The network name

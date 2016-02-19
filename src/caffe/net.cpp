@@ -23,6 +23,11 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/util/upgrade_proto.hpp"
 
+#ifdef RUN_TIME
+#include "caffe/fast_rcnn_layers.hpp"
+#include "caffe/util/gpu_nms.hpp"
+#endif
+
 #if (!defined(_MSC_VER) && !defined(RUN_TIME))
 #include "caffe/test/test_caffe_main.hpp"
 #endif
@@ -49,12 +54,165 @@ Net<Dtype>::Net(const string& param_file, Phase phase, const Net* root_net)
 }
 #else
 template <typename Dtype>
-Net<Dtype>::Net(const string& param_file, const string& pretrained_param_file) {
+Net<Dtype>::Net(const string& param_file, const string& pretrained_param_file, const vector<int>& gpus) {
+  if (gpus.size() != 0) {
+    LOG(INFO) << "Use GPU with device ID " << gpus[0];
+    Caffe::SetDevice(gpus[0]);
+    Caffe::set_mode(Caffe::GPU);
+  }
+  else {
+    LOG(INFO) << "Use CPU.";
+    Caffe::set_mode(Caffe::CPU);
+  }
+
   ReadNetParamsFromTextFileOrDie(param_file, &net_param_);
   net_param_.mutable_state()->set_phase(TEST);
   Init(net_param_);
   CopyTrainedLayersFrom(pretrained_param_file);
 }
+
+#ifdef RUN_TIME
+template <typename Dtype>
+void Net<Dtype>::Detect(const unsigned char* image_data, int width, int height, int stride, vector<pair<string, vector<Dtype> > >& boxes) {
+  SetInput(image_data, width, height, stride);
+  ForwardFromTo(0, layers().size() - 1);
+  GetOutput(boxes);
+}
+
+template <typename Dtype>
+void Net<Dtype>::SetInput(const unsigned char* image_data, int width, int height, int stride) {
+  int im_size_min = std::min<int>(width, height);
+  int im_size_max = std::max<int>(width, height);
+  float im_scale = (float)net_param().scale() / im_size_min;
+  if (round(im_scale * im_size_max) > net_param().max_size()) {
+    im_scale = (float)net_param().max_size() / im_size_max;
+  }
+  float im_scale_x = (float)((int)(width * im_scale / net_param().multiple()) * net_param().multiple()) / width;
+  float im_scale_y = (float)((int)(height * im_scale / net_param().multiple()) * net_param().multiple()) / height;
+
+  int resized_width = round(width * im_scale_x);
+  int resized_height = round(height * im_scale_y);
+
+  Blob<Dtype>& data = *blob_by_name("data");
+  data.Reshape(1, 3, resized_height, resized_width);
+  Dtype* data_ = data.mutable_cpu_data();
+  for (int i = 0; i < resized_height; i++) {
+    float y = i / im_scale_y;
+    int y0 = (int)floor(y);
+    int y1 = y0 + 1;
+    float ay = y - y0;
+    float by = 1 - ay;
+    for (int j = 0; j < resized_width; j++) {
+      float x = j / im_scale_x;		
+      int x0 = (int)floor(x);			
+      int x1 = x0 + 1;
+      float ax = x - x0;
+      float bx = 1 - ax;
+			
+      float B = 0, G = 0, R = 0;
+      if (ax > 0 && ay > 0) {
+        B += ax * ay * image_data[y1 * stride + x1 * 3 + 0];
+        G += ax * ay * image_data[y1 * stride + x1 * 3 + 1];
+        R += ax * ay * image_data[y1 * stride + x1 * 3 + 2];
+      }
+      if (ax > 0 && by > 0) {
+        B += ax * by * image_data[y0 * stride + x1 * 3 + 0];
+        G += ax * by * image_data[y0 * stride + x1 * 3 + 1];
+        R += ax * by * image_data[y0 * stride + x1 * 3 + 2];
+      }
+      if (bx > 0 && ay > 0) {
+        B += bx * ay * image_data[y1 * stride + x0 * 3 + 0];
+        G += bx * ay * image_data[y1 * stride + x0 * 3 + 1];
+        R += bx * ay * image_data[y1 * stride + x0 * 3 + 2];
+      }
+      if (bx > 0 && by > 0) {
+        B += bx * by * image_data[y0 * stride + x0 * 3 + 0];
+        G += bx * by * image_data[y0 * stride + x0 * 3 + 1];
+        R += bx * by * image_data[y0 * stride + x0 * 3 + 2];
+      }
+
+      data_[((0 * 3 + 0) * resized_height + i) *  resized_width + j] = B - net_param().mean_value(0);
+      data_[((0 * 3 + 1) * resized_height + i) *  resized_width + j] = G - net_param().mean_value(1);
+      data_[((0 * 3 + 2) * resized_height + i) *  resized_width + j] = R - net_param().mean_value(2);
+    }
+  }
+
+  Blob<Dtype>& im_info = *blob_by_name("im_info");
+  Dtype* im_info_ = im_info.mutable_cpu_data();
+  im_info_[0] = resized_height;
+  im_info_[1] = resized_width;
+  im_info_[2] = im_scale_x;
+  im_info_[3] = im_scale_y;
+}
+
+template <typename Dtype>
+void Net<Dtype>::GetOutput(vector<pair<string, vector<Dtype> > >& boxes) {
+	Blob<Dtype>& im_info = *blob_by_name("im_info");
+	const Dtype* im_info_ = im_info.cpu_data();
+	Blob<Dtype>& rois = *blob_by_name("rois");
+	const Dtype* rois_ = rois.cpu_data();
+	Blob<Dtype>& bbox_pred = *blob_by_name("bbox_pred");
+	const Dtype* bbox_pred_ = bbox_pred.cpu_data();
+	Blob<Dtype>& cls_prob = *blob_by_name("cls_prob");
+	const Dtype* cls_prob_ = cls_prob.cpu_data();
+
+	int img_w = im_info_[1];
+	int img_h = im_info_[0];
+	Dtype im_scale_x = im_info_[2];
+	Dtype im_scale_y = im_info_[3];
+	int min_size = layer_by_name("proposal")->layer_param().proposal_param().min_size();
+	int min_w = min_size * im_scale_x;
+	int min_h = min_size * im_scale_y;
+
+	boxes.clear();
+
+	for (int i = 1; i < cls_prob.shape(1); i++) {
+		vector<BoundingBox<Dtype> > box(cls_prob.shape(0));
+		for (int j = 0; j < cls_prob.shape(0); j++) {
+			int rois_idx = j * 5;
+			int cls_prob_idx = j * cls_prob.shape(1) + i;
+			int bbox_pred_idx = j * bbox_pred.shape(1) + i * 4;
+			box[j].x1 = rois_[rois_idx + 1] / im_scale_x;
+			box[j].y1 = rois_[rois_idx + 2] / im_scale_y;
+			box[j].x2 = rois_[rois_idx + 3] / im_scale_x;
+			box[j].y2 = rois_[rois_idx + 4] / im_scale_y;
+			box[j].score = cls_prob_[cls_prob_idx];
+			box[j].transform_box(bbox_pred_[bbox_pred_idx + 0], bbox_pred_[bbox_pred_idx + 1], bbox_pred_[bbox_pred_idx + 2], bbox_pred_[bbox_pred_idx + 3], img_w, img_h, min_w, min_h);
+		}
+		std::sort(box.begin(), box.end());
+
+		int* keep = (int*)calloc(box.size(), sizeof(int));
+		int num_out = 0;
+		float* sorted_dets = (float*)calloc(box.size() * 5, sizeof(float));
+		for (int j = 0; j < box.size(); j++) {
+			sorted_dets[j * 5 + 0] = box[j].x1;
+			sorted_dets[j * 5 + 1] = box[j].y1;
+			sorted_dets[j * 5 + 2] = box[j].x2;
+			sorted_dets[j * 5 + 3] = box[j].y2;
+			sorted_dets[j * 5 + 4] = box[j].score;
+		}
+
+		_nms(keep, &num_out, sorted_dets, box.size(), 5, net_param().nms_thresh());
+
+		for (int j = 0; j < num_out; j++) {
+			if (box[keep[j]].score >= net_param().conf_thresh()) {
+				pair<string, vector<Dtype> > _box;
+				_box.first = net_param().class_name(i - 1);
+				_box.second.push_back(box[keep[j]].x1);
+				_box.second.push_back(box[keep[j]].y1);
+				_box.second.push_back(box[keep[j]].x2);
+				_box.second.push_back(box[keep[j]].y2);
+				_box.second.push_back(box[keep[j]].score);
+				boxes.push_back(_box);
+			}
+		}
+
+		free(keep);
+		free(sorted_dets);
+	}
+}
+#endif
+
 #endif
 
 template <typename Dtype>
