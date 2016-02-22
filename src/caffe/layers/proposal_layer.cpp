@@ -176,26 +176,26 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 		}
 	}
 
-        FILE* fp = fopen("bottom.txt", "w");
+        FILE* fp = fopen("../test/data/temp/proposal_bottom0.txt", "w");
         for (int k = 0; k < bottom[0]->count(); ++k)
             fprintf(fp, "%.6f\n", scores[k]);
         fclose(fp);
-        fp = fopen("bbox.txt", "w");
+        fp = fopen("../test/data/temp/proposal_bottom1.txt", "w");
         for (int k = 0; k < bottom[1]->count(); ++k)
             fprintf(fp, "%.6f\n", bbox_deltas[k]);
         fclose(fp);
-        fp = fopen("im_info.txt", "w");
+        fp = fopen("../test/data/temp/proposal_bottom2.txt", "w");
         for (int k = 0; k < bottom[2]->count()+1; ++k)
             fprintf(fp, "%.6f\n", im_info[k]);
         fclose(fp);
-        fp = fopen("roi.txt", "w");
+        fp = fopen("../test/data/temp/proposal_top0.txt", "w");
         for (int k = 0; k < nproposals; ++k) {
           for (int i = 1; i < 5; ++i)
             fprintf(fp, "%.2f ", top0[k * 5 + i]);
           fprintf(fp, "\n");
         }
         fclose(fp);
-        fp = fopen("shapes.txt", "w");
+        fp = fopen("../test/data/temp/proposal_shapes.txt", "w");
         fprintf(fp, "scores: %d %d %d\n", bottom[0]->channels(), bottom[0]->height(), bottom[0]->width());
         fprintf(fp, "bboxes: %d %d %d\n", bottom[1]->channels(), bottom[1]->height(), bottom[1]->width());
         fclose(fp);
