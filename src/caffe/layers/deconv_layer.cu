@@ -1,4 +1,5 @@
 #include <vector>
+#include <stdio.h>
 
 #include "caffe/filler.hpp"
 #include "caffe/layer.hpp"
@@ -24,6 +25,33 @@ void DeconvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       }
     }
   }
+
+  const Dtype* data = bottom[0]->cpu_data();
+  FILE* fp = fopen("../test/data/temp/deconv_bottom0.txt", "w");
+  for (int i = 0; i < bottom[0]->count(); ++i) {
+    fprintf(fp, "%.6f\n", data[i]);
+  }
+  fclose(fp);
+  data = this->blobs_[0]->cpu_data();
+  fp = fopen("../test/data/temp/deconv_param0.txt", "w");
+  for (int i = 0; i < this->blobs_[0]->count(); ++i) {
+    fprintf(fp, "%.6f\n", data[i]);
+  }
+  fclose(fp);
+  if (this->bias_term_) {
+    data = this->blobs_[1]->cpu_data();
+    fp = fopen("../test/data/temp/deconv_param1.txt", "w");
+    for (int i = 0; i < this->blobs_[1]->count(); ++i) {
+      fprintf(fp, "%.6f\n", data[i]);
+    }
+    fclose(fp);
+  }
+  data = top[0]->cpu_data();
+  fp = fopen("../test/data/temp/deconv_top0.txt", "w");
+  for (int i = 0; i < top[0]->count(); ++i) {
+    fprintf(fp, "%.4f\n", data[i]);
+  }
+  fclose(fp);
 }
 
 template <typename Dtype>
