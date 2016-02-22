@@ -84,11 +84,28 @@ void ROIPoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
   int* argmax_data = max_idx_.mutable_gpu_data();
   int count = top[0]->count();
+  FILE* fp = fopen("pooled_region.txt", "w");
   // NOLINT_NEXT_LINE(whitespace/operators)
   ROIPoolForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
       count, bottom_data, spatial_scale_, channels_, height_, width_,
       pooled_height_, pooled_width_, bottom_rois, top_data, argmax_data);
   CUDA_POST_KERNEL_CHECK;
+  fclose(fp);
+  const Dtype* data = bottom[0]->cpu_data();
+  fp = fopen("convf.txt", "w");
+  for (int i = 0; i < bottom[0]->count(); ++i)
+    fprintf(fp, "%.6f\n", data[i]);
+  fclose(fp);
+  data = bottom[1]->cpu_data();
+  fp = fopen("roi2.txt", "w");
+  for (int i = 0; i < bottom[1]->count(); ++i)
+    fprintf(fp, "%.6f\n", data[i]);
+  fclose(fp);
+  data = top[0]->cpu_data();
+  fp = fopen("pooled.txt", "w");
+  for (int i = 0; i < top[0]->count(); ++i)
+    fprintf(fp, "%.6f\n", data[i]);
+  fclose(fp);
 }
 
 template <typename Dtype>
