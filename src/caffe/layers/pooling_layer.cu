@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <vector>
+#include <stdio.h>
 
 #include "caffe/layer.hpp"
 #include "caffe/util/math_functions.hpp"
@@ -211,6 +212,28 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     LOG(FATAL) << "Unknown pooling method.";
   }
   CUDA_POST_KERNEL_CHECK;
+
+  if (this->layer_param_.pooling_param().logging()) {
+    FILE* fp = fopen("../test/data/temp/pool_bottom0.txt", "w");
+    const Dtype* data = bottom[0]->cpu_data();
+    for (int n = 0; n < bottom[0]->count(); ++n) {
+      fprintf(fp, "%.6f\n", data[n]);
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/pool_top0.txt", "w");
+    data = top[0]->cpu_data();
+    for (int n = 0; n < top[0]->count(); ++n) {
+      fprintf(fp, "%.4f\n", data[n]);
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/pool_shapes.txt", "w");
+    fprintf(fp, "bottom: %d %d %d %d\n", bottom[0]->num(), bottom[0]->channels(), bottom[0]->height(), bottom[0]->width());
+    fprintf(fp, "top: %d %d %d %d\n", top[0]->num(), top[0]->channels(), top[0]->height(), top[0]->width());
+    fprintf(fp, "kernel: %d %d\n", this->kernel_h_, this->kernel_w_);
+    fprintf(fp, "stride: %d %d\n", this->stride_h_, this->stride_w_);
+    fprintf(fp, "pad: %d %d\n", this->pad_h_, this->pad_w_);
+    fclose(fp);
+  }
 }
 
 

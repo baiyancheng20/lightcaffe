@@ -5,3 +5,5 @@
 ./tools/train_faster_rcnn_alt_opt.py --gpu 1 --net_name SRPN_PVANET7.1.1_AUTO --round 0 --weights models/SRPN_PVANET7.1.1/trainedModel/pvanet7.1.1_train_iter_900000.caffemodel --imdb pvtdb:vocmscoco:22 --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --iters 4000000
 
 ./runtime/build/tools/faster-rcnn snapshot -gpu 0 -model SRPN_PVANET7.1.1_faster_rcnn_test_rt.pt -weights SRPN_PVANET7.1.1_faster_rcnn_once_iter_900000.caffemodel -img data/pvtdb/VOC2007/JPEGImages/000004.jpg
+
+./tools/test_net.py --gpu 0 --def models/SRPN_PVANET7.1.1_AUTO/faster_rcnn_once/faster_rcnn_test.pt --net output/faster_rcnn_once_5anchors/pvtdb_vocmscoco_22/SRPN_PVANET7.1.1_AUTO_faster_rcnn_once_iter_1200000.caffemodel --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --imdb pvtdb:voc2007test:20
