@@ -29,27 +29,47 @@ void DeconvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* data = bottom[0]->cpu_data();
   FILE* fp = fopen("../test/data/temp/deconv_bottom0.txt", "w");
   for (int i = 0; i < bottom[0]->count(); ++i) {
-    fprintf(fp, "%.6f\n", data[i]);
+    fprintf(fp, "%.9f\n", data[i]);
+  }
+  fclose(fp);
+  fp = fopen("../test/data/temp/deconv_bottom0.bin", "wb");
+  if (fwrite(data, sizeof(Dtype), bottom[0]->count(), fp) != bottom[0]->count()) {
+    printf("Error while writing deconv_bottom0\n");
   }
   fclose(fp);
   data = this->blobs_[0]->cpu_data();
   fp = fopen("../test/data/temp/deconv_param0.txt", "w");
   for (int i = 0; i < this->blobs_[0]->count(); ++i) {
-    fprintf(fp, "%.6f\n", data[i]);
+    fprintf(fp, "%.9f\n", data[i]);
+  }
+  fclose(fp);
+  fp = fopen("../test/data/temp/deconv_param0.bin", "wb");
+  if (fwrite(data, sizeof(Dtype), this->blobs_[0]->count(), fp) != this->blobs_[0]->count()) {
+    printf("Error while writing deconv_param0\n");
   }
   fclose(fp);
   if (this->bias_term_) {
     data = this->blobs_[1]->cpu_data();
     fp = fopen("../test/data/temp/deconv_param1.txt", "w");
     for (int i = 0; i < this->blobs_[1]->count(); ++i) {
-      fprintf(fp, "%.6f\n", data[i]);
+      fprintf(fp, "%.9f\n", data[i]);
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/deconv_param1.bin", "wb");
+    if (fwrite(data, sizeof(Dtype), this->blobs_[1]->count(), fp) != this->blobs_[1]->count()) {
+      printf("Error while writing deconv_param1\n");
     }
     fclose(fp);
   }
   data = top[0]->cpu_data();
   fp = fopen("../test/data/temp/deconv_top0.txt", "w");
   for (int i = 0; i < top[0]->count(); ++i) {
-    fprintf(fp, "%.4f\n", data[i]);
+    fprintf(fp, "%.9f\n", data[i]);
+  }
+  fclose(fp);
+  fp = fopen("../test/data/temp/deconv_top0.bin", "wb");
+  if (fwrite(data, sizeof(Dtype), top[0]->count(), fp) != top[0]->count()) {
+    printf("Error while writing deconv_top0\n");
   }
   fclose(fp);
 }
