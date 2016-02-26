@@ -191,7 +191,7 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
         fp = fopen("../test/data/temp/proposal_top0.txt", "w");
         for (int k = 0; k < nproposals; ++k) {
           for (int i = 1; i < 5; ++i)
-            fprintf(fp, "%.2f ", top0[k * 5 + i]);
+            fprintf(fp, "%.6f ", top0[k * 5 + i]);
           fprintf(fp, "\n");
         }
         fclose(fp);
