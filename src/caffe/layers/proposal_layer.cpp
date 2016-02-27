@@ -180,19 +180,42 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
         for (int k = 0; k < bottom[0]->count(); ++k)
             fprintf(fp, "%.6f\n", scores[k]);
         fclose(fp);
+        fp = fopen("../test/data/temp/proposal_bottom0.bin", "wb");
+        if (fwrite(scores, sizeof(Dtype), bottom[0]->count(), fp) != bottom[0]->count()) {
+          printf("Error while writing proposal_bottom0\n");
+        }
+        fclose(fp);
         fp = fopen("../test/data/temp/proposal_bottom1.txt", "w");
         for (int k = 0; k < bottom[1]->count(); ++k)
             fprintf(fp, "%.6f\n", bbox_deltas[k]);
         fclose(fp);
+        fp = fopen("../test/data/temp/proposal_bottom1.bin", "wb");
+        if (fwrite(bbox_deltas, sizeof(Dtype), bottom[1]->count(), fp) != bottom[1]->count()) {
+          printf("Error while writing proposal_bottom1\n");
+        }
+        fclose(fp);
         fp = fopen("../test/data/temp/proposal_bottom2.txt", "w");
         for (int k = 0; k < bottom[2]->count()+1; ++k)
             fprintf(fp, "%.6f\n", im_info[k]);
+        fclose(fp);
+        fp = fopen("../test/data/temp/proposal_bottom2.bin", "wb");
+        if (fwrite(im_info, sizeof(Dtype), bottom[2]->count()+1, fp) != bottom[2]->count()+1) {
+          printf("Error while writing proposal_bottom2\n");
+        }
         fclose(fp);
         fp = fopen("../test/data/temp/proposal_top0.txt", "w");
         for (int k = 0; k < nproposals; ++k) {
           for (int i = 1; i < 5; ++i)
             fprintf(fp, "%.6f ", top0[k * 5 + i]);
           fprintf(fp, "\n");
+        }
+        fclose(fp);
+        fp = fopen("../test/data/temp/proposal_top0.bin", "wb");
+        if (fwrite(&nproposals, sizeof(int), 1, fp) != 1) {
+          printf("Error while writing proposal_top0_size\n");
+        }
+        if (fwrite(top0, sizeof(Dtype), nproposals * 5, fp) != nproposals * 5) {
+          printf("Error while writing proposal_top0\n");
         }
         fclose(fp);
         fp = fopen("../test/data/temp/proposal_shapes.txt", "w");
