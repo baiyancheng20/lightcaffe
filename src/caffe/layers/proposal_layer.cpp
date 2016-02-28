@@ -176,7 +176,8 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 		}
 	}
 
-        FILE* fp = fopen("../test/data/temp/proposal_bottom0.txt", "w");
+        FILE* fp;
+        fp = fopen("../test/data/temp/proposal_bottom0.txt", "w");
         for (int k = 0; k < bottom[0]->count(); ++k)
             fprintf(fp, "%.6f\n", scores[k]);
         fclose(fp);
@@ -221,6 +222,13 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
         fp = fopen("../test/data/temp/proposal_shapes.txt", "w");
         fprintf(fp, "scores: %d %d %d\n", bottom[0]->channels(), bottom[0]->height(), bottom[0]->width());
         fprintf(fp, "bboxes: %d %d %d\n", bottom[1]->channels(), bottom[1]->height(), bottom[1]->width());
+        fclose(fp);
+        fp = fopen("../test/data/temp/proposal_sorted.txt", "w");
+	for (int i = 0; i < proposals.size(); i++) {
+          fprintf(fp, "box %d (score=%.6f, %.2f x %.2f): %.2f %.2f %.2f %.2f\n",
+                  i, proposals[i].score, proposals[i].y2 - proposals[i].y1 + 1, proposals[i].x2 - proposals[i].x1 + 1,
+                  proposals[i].x1, proposals[i].y1, proposals[i].x2, proposals[i].y2);
+	}
         fclose(fp);
 
 	free(keep);
