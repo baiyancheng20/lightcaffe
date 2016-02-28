@@ -29,6 +29,59 @@ void InnerProductLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
                             bias_multiplier_.gpu_data(),
                             this->blobs_[1]->gpu_data(), (Dtype)1., top_data);
   }
+
+  if (this->layer_param_.inner_product_param().logging()) {
+    FILE* fp = fopen("../test/data/temp/fc_bottom0.txt", "w");
+    const Dtype* data = bottom[0]->cpu_data();
+    for (int n = 0; n < bottom[0]->count(); ++n) {
+      fprintf(fp, "%.6f\n", data[n]);
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/fc_bottom0.bin", "wb");
+    if (fwrite(data, sizeof(Dtype), bottom[0]->count(), fp) != bottom[0]->count()) {
+      printf("Error while writing fc_bottom0\n");
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/fc_param0.txt", "w");
+    data = this->blobs_[0]->cpu_data();
+    for (int n = 0; n < this->blobs_[0]->count(); ++n) {
+      fprintf(fp, "%.6f\n", data[n]);
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/fc_param0.bin", "wb");
+    if (fwrite(data, sizeof(Dtype), this->blobs_[0]->count(), fp) != this->blobs_[0]->count()) {
+      printf("Error while writing fc_param0\n");
+    }
+    fclose(fp);
+    if (this->bias_term_) {
+      fp = fopen("../test/data/temp/fc_param1.txt", "w");
+      data = this->blobs_[1]->cpu_data();
+      for (int n = 0; n < this->blobs_[1]->count(); ++n) {
+        fprintf(fp, "%.6f\n", data[n]);
+      }
+      fclose(fp);
+      fp = fopen("../test/data/temp/fc_param1.bin", "wb");
+      if (fwrite(data, sizeof(Dtype), this->blobs_[1]->count(), fp) != this->blobs_[1]->count()) {
+        printf("Error while writing fc_param1\n");
+      }
+      fclose(fp);
+    }
+    fp = fopen("../test/data/temp/fc_top0.txt", "w");
+    data = top[0]->cpu_data();
+    for (int n = 0; n < top[0]->count(); ++n) {
+      fprintf(fp, "%.6f\n", data[n]);
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/fc_top0.bin", "wb");
+    if (fwrite(data, sizeof(Dtype), top[0]->count(), fp) != top[0]->count()) {
+      printf("Error while writing fc_top0\n");
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/fc_shapes.txt", "w");
+    fprintf(fp, "bottom: %d %d\n", M_, K_);
+    fprintf(fp, "top: %d %d\n", M_, N_);
+    fclose(fp);
+  }
 }
 
 template <typename Dtype>

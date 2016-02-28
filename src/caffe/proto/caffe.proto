@@ -558,6 +558,7 @@ message ConvolutionParameter {
     CUDNN = 2;
   }
   optional Engine engine = 15 [default = DEFAULT];
+
   optional bool logging = 16 [default = false];
 }
 
@@ -598,6 +599,8 @@ message DataParameter {
 message DropoutParameter {
   optional float dropout_ratio = 1 [default = 0.5]; // dropout ratio
   optional bool scale_train = 2 [default = true];  // scale train or test phase
+
+  optional bool logging = 3 [default = false];
 }
 
 // DummyDataLayer fills any number of arbitrarily shaped blobs with random
@@ -743,6 +746,8 @@ message InnerProductParameter {
   // all preceding axes are retained in the output.
   // May be negative to index from the end (e.g., -1 for the last axis).
   optional int32 axis = 5 [default = 1];
+
+  optional bool logging = 6 [default = false];
 }
 
 // Message that stores parameters used by LogLayer
@@ -813,6 +818,7 @@ message PoolingParameter {
   // If global_pooling then it will pool over the size of the bottom by doing
   // kernel_h = bottom->height and kernel_w = bottom->width
   optional bool global_pooling = 12 [default = false];
+
   optional bool logging = 13 [default = false];
 }
 
