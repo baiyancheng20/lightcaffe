@@ -220,10 +220,20 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       fprintf(fp, "%.6f\n", data[n]);
     }
     fclose(fp);
+    fp = fopen("../test/data/temp/pool_bottom0.bin", "wb");
+    if (fwrite(data, sizeof(Dtype), bottom[0]->count(), fp) != bottom[0]->count()) {
+      printf("Error while writing pool_bottom0\n");
+    }
+    fclose(fp);
     fp = fopen("../test/data/temp/pool_top0.txt", "w");
     data = top[0]->cpu_data();
     for (int n = 0; n < top[0]->count(); ++n) {
       fprintf(fp, "%.6f\n", data[n]);
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/pool_top0.bin", "wb");
+    if (fwrite(data, sizeof(Dtype), top[0]->count(), fp) != top[0]->count()) {
+      printf("Error while writing pool_top0\n");
     }
     fclose(fp);
     fp = fopen("../test/data/temp/pool_shapes.txt", "w");

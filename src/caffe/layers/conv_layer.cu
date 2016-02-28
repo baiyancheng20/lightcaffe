@@ -35,7 +35,7 @@ void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     FILE* fp = fopen("../test/data/temp/conv_bottom0.txt", "w");
     const Dtype* data = bottom[0]->cpu_data();
     for (int n = 0; n < bottom[0]->count(); ++n) {
-      fprintf(fp, "%.9f\n", data[n]);
+      fprintf(fp, "%.6f\n", data[n]);
     }
     fclose(fp);
     fp = fopen("../test/data/temp/conv_bottom0.bin", "wb");
@@ -46,7 +46,7 @@ void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     fp = fopen("../test/data/temp/conv_param0.txt", "w");
     data = this->blobs_[0]->cpu_data();
     for (int n = 0; n < this->blobs_[0]->count(); ++n) {
-      fprintf(fp, "%.9f\n", data[n]);
+      fprintf(fp, "%.6f\n", data[n]);
     }
     fclose(fp);
     fp = fopen("../test/data/temp/conv_param0.bin", "wb");
@@ -58,7 +58,7 @@ void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       fp = fopen("../test/data/temp/conv_param1.txt", "w");
       data = this->blobs_[1]->cpu_data();
       for (int n = 0; n < this->blobs_[1]->count(); ++n) {
-        fprintf(fp, "%.9f\n", data[n]);
+        fprintf(fp, "%.6f\n", data[n]);
       }
       fclose(fp);
       fp = fopen("../test/data/temp/conv_param1.bin", "wb");
@@ -70,7 +70,7 @@ void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     fp = fopen("../test/data/temp/conv_top0.txt", "w");
     data = top[0]->cpu_data();
     for (int n = 0; n < top[0]->count(); ++n) {
-      fprintf(fp, "%.9f\n", data[n]);
+      fprintf(fp, "%.6f\n", data[n]);
     }
     fclose(fp);
     fp = fopen("../test/data/temp/conv_top0.bin", "wb");
