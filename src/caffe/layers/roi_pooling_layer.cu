@@ -90,16 +90,48 @@ void ROIPoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       pooled_height_, pooled_width_, bottom_rois, top_data, argmax_data);
   CUDA_POST_KERNEL_CHECK;
 
-  const Dtype* data = bottom[0]->cpu_data();
-  FILE* fp = fopen("../test/data/temp/roipool_bottom0.txt", "w");
+  this->LoggingData("roipool_bottom0", *bottom[0]);
+  this->LoggingData("roipool_top0", *top[0]);
+/*
+  FILE* fp;
+  const Dtype* data;
+  data = bottom[0]->cpu_data();
+  fp = fopen("../test/data/temp/roipool_bottom0.bin", "wb");
+  int ndim = bottom[0]->num_axes();
+  fwrite(&ndim, sizeof(int), 1, fp);
+  for (int i = 0; i < ndim; ++i) {
+    int shape_i = bottom[0]->count(i);
+    fwrite(&shape_i, sizeof(int), 1, fp);
+  }
+  if (fwrite(data, sizeof(Dtype), bottom[0]->count(), fp) != bottom[0]->count()) {
+    printf("Error while writing roipool_bottom0\n");
+  }
+  fclose(fp);
+  data = top[0]->cpu_data();
+  fp = fopen("../test/data/temp/roipool_top0.bin", "wb");
+  int ndim = top[0]->num_axes();
+  fwrite(&ndim, sizeof(int), 1, fp);
+  for (int i = 0; i < ndim; ++i) {
+    int shape_i = top[0]->count(i);
+    fwrite(&shape_i, sizeof(int), 1, fp);
+  }
+  if (fwrite(data, sizeof(Dtype), top[0]->count(), fp) != top[0]->count()) {
+    printf("Error while writing roipool_top0\n");
+  }
+  fclose(fp);
+#ifdef LOGGING_TEXT
+  data = bottom[0]->cpu_data();
+  fp = fopen("../test/data/temp/roipool_bottom0.txt", "w");
   for (int i = 0; i < bottom[0]->count(); ++i)
     fprintf(fp, "%.6f\n", data[i]);
   fclose(fp);
-  data = top[0]->cpu_data();
+  data = bottom[0]->cpu_data();
   fp = fopen("../test/data/temp/roipool_top0.txt", "w");
   for (int i = 0; i < top[0]->count(); ++i)
     fprintf(fp, "%.6f\n", data[i]);
   fclose(fp);
+#endif
+*/
 }
 
 template <typename Dtype>

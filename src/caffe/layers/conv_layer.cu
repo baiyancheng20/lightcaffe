@@ -1,5 +1,4 @@
 #include <vector>
-#include <stdio.h>
 
 #include "caffe/filler.hpp"
 #include "caffe/layer.hpp"
@@ -32,6 +31,13 @@ void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   }
 
   if (this->layer_param_.convolution_param().logging()) {
+    this->LoggingData("conv_bottom0", *bottom[0]);
+    this->LoggingData("conv_param0", *this->blobs_[0]);
+    if (this->bias_term_)
+      this->LoggingData("conv_param1", *this->blobs_[1]);
+    this->LoggingData("conv_top0", *top[0]);
+  }
+/*
     FILE* fp = fopen("../test/data/temp/conv_bottom0.txt", "w");
     const Dtype* data = bottom[0]->cpu_data();
     for (int n = 0; n < bottom[0]->count(); ++n) {
@@ -85,7 +91,7 @@ void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     fprintf(fp, "stride: %d %d\n", this->stride_h_, this->stride_w_);
     fprintf(fp, "pad: %d %d\n", this->pad_h_, this->pad_w_);
     fclose(fp);
-  }
+*/
 }
 
 template <typename Dtype>

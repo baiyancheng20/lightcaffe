@@ -1,5 +1,4 @@
 #include <vector>
-#include <stdio.h>
 
 #include "caffe/filler.hpp"
 #include "caffe/layer.hpp"
@@ -26,6 +25,12 @@ void DeconvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     }
   }
 
+  this->LoggingData("deconv_bottom0", *bottom[0]);
+  this->LoggingData("deconv_param0", *this->blobs_[0]);
+  if (this->bias_term_)
+    this->LoggingData("deconv_param1", *this->blobs_[1]);
+  this->LoggingData("deconv_top0", *top[0]);
+/*
   const Dtype* data = bottom[0]->cpu_data();
   FILE* fp = fopen("../test/data/temp/deconv_bottom0.txt", "w");
   for (int i = 0; i < bottom[0]->count(); ++i) {
@@ -72,6 +77,7 @@ void DeconvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     printf("Error while writing deconv_top0\n");
   }
   fclose(fp);
+*/
 }
 
 template <typename Dtype>

@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cfloat>
 #include <vector>
-#include <stdio.h>
 
 #include "caffe/layer.hpp"
 #include "caffe/util/math_functions.hpp"
@@ -214,26 +213,49 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   CUDA_POST_KERNEL_CHECK;
 
   if (this->layer_param_.pooling_param().logging()) {
-    FILE* fp = fopen("../test/data/temp/pool_bottom0.txt", "w");
-    const Dtype* data = bottom[0]->cpu_data();
-    for (int n = 0; n < bottom[0]->count(); ++n) {
-      fprintf(fp, "%.6f\n", data[n]);
-    }
-    fclose(fp);
+    this->LoggingData("pool_bottom0", *bottom[0]);
+    this->LoggingData("pool_top0", *top[0]);
+  }
+/*
+#ifdef LOGGING_BIN
+    FILE* fp;
+    const Dtype* data;
     fp = fopen("../test/data/temp/pool_bottom0.bin", "wb");
+    int ndim = bottom[0]->num_axes();
+    fwrite(&ndim, sizeof(int), 1, fp);
+    for (int i = 0; i < ndim; ++i) {
+      int shape_i = bottom[0]->count(i);
+      fwrite(&shape_i, sizeof(int), 1, fp);
+    }
+    data = bottom[0]->cpu_data();
     if (fwrite(data, sizeof(Dtype), bottom[0]->count(), fp) != bottom[0]->count()) {
       printf("Error while writing pool_bottom0\n");
+    }
+    fclose(fp);
+    fp = fopen("../test/data/temp/pool_top0.bin", "wb");
+    int ndim = top[0]->num_axes();
+    fwrite(&ndim, sizeof(int), 1, fp);
+    for (int i = 0; i < ndim; ++i) {
+      int shape_i = top[0]->count(i);
+      fwrite(&shape_i, sizeof(int), 1, fp);
+    }
+    data = top[0]->cpu_data();
+    if (fwrite(data, sizeof(Dtype), top[0]->count(), fp) != top[0]->count()) {
+      printf("Error while writing pool_top0\n");
+    }
+    fclose(fp);
+#endif
+#ifdef LOGGING_TEXT
+    fp = fopen("../test/data/temp/pool_bottom0.txt", "w");
+    data = bottom[0]->cpu_data();
+    for (int n = 0; n < bottom[0]->count(); ++n) {
+      fprintf(fp, "%.6f\n", data[n]);
     }
     fclose(fp);
     fp = fopen("../test/data/temp/pool_top0.txt", "w");
     data = top[0]->cpu_data();
     for (int n = 0; n < top[0]->count(); ++n) {
       fprintf(fp, "%.6f\n", data[n]);
-    }
-    fclose(fp);
-    fp = fopen("../test/data/temp/pool_top0.bin", "wb");
-    if (fwrite(data, sizeof(Dtype), top[0]->count(), fp) != top[0]->count()) {
-      printf("Error while writing pool_top0\n");
     }
     fclose(fp);
     fp = fopen("../test/data/temp/pool_shapes.txt", "w");
@@ -243,7 +265,8 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     fprintf(fp, "stride: %d %d\n", this->stride_h_, this->stride_w_);
     fprintf(fp, "pad: %d %d\n", this->pad_h_, this->pad_w_);
     fclose(fp);
-  }
+#endif
+*/
 }
 
 

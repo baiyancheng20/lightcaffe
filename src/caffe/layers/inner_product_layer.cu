@@ -31,6 +31,14 @@ void InnerProductLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   }
 
   if (this->layer_param_.inner_product_param().logging()) {
+    this->LoggingData("fc_bottom0", *bottom[0]);
+    this->LoggingData("fc_param0", *this->blobs_[0]);
+    if (this->bias_term_)
+      this->LoggingData("fc_param1", *this->blobs_[1]);
+    this->LoggingData("fc_top0", *top[0]);
+  }
+/*
+  if (this->layer_param_.inner_product_param().logging()) {
     FILE* fp = fopen("../test/data/temp/fc_bottom0.txt", "w");
     const Dtype* data = bottom[0]->cpu_data();
     for (int n = 0; n < bottom[0]->count(); ++n) {
@@ -82,6 +90,7 @@ void InnerProductLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     fprintf(fp, "top: %d %d\n", M_, N_);
     fclose(fp);
   }
+*/
 }
 
 template <typename Dtype>

@@ -5,8 +5,6 @@
 #include <utility>
 #include <vector>
 
-#include <stdio.h>
-
 #ifndef RUN_TIME
 #include "hdf5.h"
 #endif
@@ -393,19 +391,10 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
       }
     }
 
-    char filename[1024];
     for (int param_id = 0; param_id < num_param_blobs; ++param_id) {
-      const Blob<Dtype>* param = layers_[layer_id]->blobs()[param_id].get();
-      sprintf(filename, "../test/data/temp/%s_param%d.bin", layer_names_[layer_id].c_str(), param_id);
-      FILE* fp = fopen(filename, "wb");
-      int ndim = param->num_axes();
-      fwrite(&ndim, sizeof(int), 1, fp);
-      for (int di = 0; di < ndim; ++di) {
-        int shape_i = param->shape(di);
-        fwrite(&shape_i, sizeof(int), 1, fp);
-      }
-      fwrite(param->cpu_data(), sizeof(Dtype), param->count(), fp);
-      fclose(fp);
+      char filename[1024];
+      sprintf(filename, "%s_param%d", layer_names_[layer_id].c_str(), param_id);
+      layers_[layer_id]->LoggingData(filename, *layers_[layer_id]->blobs()[param_id].get());
     }
   }
   // Go through the net backwards to determine which blobs contribute to the

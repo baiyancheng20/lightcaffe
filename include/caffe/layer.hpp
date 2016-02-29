@@ -318,6 +318,8 @@ class Layer {
 
   inline Phase phase() { return phase_; }
 
+  void LoggingData(const char* blob_name, const Blob<Dtype>& blob);
+
  protected:
   /** The protobuf that stores the layer parameters */
   LayerParameter layer_param_;

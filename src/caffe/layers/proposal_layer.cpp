@@ -5,7 +5,6 @@
 // Written by Ross Girshick
 // ------------------------------------------------------------------
 
-#include <stdio.h>
 #include <cfloat>
 
 #include "caffe/fast_rcnn_layers.hpp"
@@ -176,6 +175,11 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 		}
 	}
 
+        this->LoggingData("proposal_bottom0", *bottom[0]);
+        this->LoggingData("proposal_bottom1", *bottom[1]);
+        this->LoggingData("proposal_bottom2", *bottom[2]);
+        this->LoggingData("proposal_top0", *top[0]);
+/*
         FILE* fp;
         fp = fopen("../test/data/temp/proposal_bottom0.txt", "w");
         for (int k = 0; k < bottom[0]->count(); ++k)
@@ -230,6 +234,7 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
                   proposals[i].x1, proposals[i].y1, proposals[i].x2, proposals[i].y2);
 	}
         fclose(fp);
+*/
 
 	free(keep);
 	free(sorted_dets);
