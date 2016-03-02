@@ -73,7 +73,31 @@ Net<Dtype>::Net(const string& param_file, const string& pretrained_param_file, c
 
 #ifdef RUN_TIME
 template <typename Dtype>
+void copy_layer_from_to(Layer<Dtype>& src, Layer<Dtype>& dst) {
+  for (int j = 0; j < src.blobs().size(); ++j) {
+    dst.blobs()[j].get()->CopyFrom(*src.blobs()[j].get(), false, true);
+  }
+}
+
+template <typename Dtype>
 void Net<Dtype>::Detect(const unsigned char* image_data, int width, int height, int stride, vector<pair<string, vector<Dtype> > >& boxes) {
+  for (int layer_id = 0; layer_id < layer_names_.size(); ++layer_id) {
+    const char* ln = layer_names_[layer_id].c_str();
+    if (ln[0] == 'n' && ln[1] == 'e' && ln[2] == 'w' && ln[3] == '_') {
+      for (int lid = 0; lid < layer_id; ++lid) {
+        if (strcmp(layer_names_[lid].c_str(), ln + 4) == 0) {
+          LOG(INFO) << "Matched: " << layer_names_[lid];
+          copy_layer_from_to(*layers_[lid], *layers_[layer_id]);
+          break;
+        }
+      }
+    }
+    for (int param_id = 0; param_id < layers_[layer_id]->blobs().size(); ++param_id) {
+      char filename[1024];
+      sprintf(filename, "%s_param%d", layer_names_[layer_id].c_str(), param_id);
+      layers_[layer_id]->LoggingData(filename, *layers_[layer_id]->blobs()[param_id].get());
+    }
+  }
   SetInput(image_data, width, height, stride);
   ForwardFromTo(0, layers().size() - 1);
   GetOutput(boxes);
@@ -149,18 +173,18 @@ template <typename Dtype>
 void Net<Dtype>::GetOutput(vector<pair<string, vector<Dtype> > >& boxes) {
 	Blob<Dtype>& im_info = *blob_by_name("im_info");
 	const Dtype* im_info_ = im_info.cpu_data();
-	Blob<Dtype>& rois = *blob_by_name("rois");
+	Blob<Dtype>& rois = *blob_by_name("new_rois");
 	const Dtype* rois_ = rois.cpu_data();
-	Blob<Dtype>& bbox_pred = *blob_by_name("bbox_pred");
+	Blob<Dtype>& bbox_pred = *blob_by_name("new_bbox_pred");
 	const Dtype* bbox_pred_ = bbox_pred.cpu_data();
-	Blob<Dtype>& cls_prob = *blob_by_name("cls_prob");
+	Blob<Dtype>& cls_prob = *blob_by_name("new_cls_prob");
 	const Dtype* cls_prob_ = cls_prob.cpu_data();
 
 	int img_w = im_info_[1];
 	int img_h = im_info_[0];
 	Dtype im_scale_x = im_info_[2];
 	Dtype im_scale_y = im_info_[3];
-	int min_size = layer_by_name("proposal")->layer_param().proposal_param().min_size();
+	int min_size = layer_by_name("reproposal")->layer_param().proposal_param().min_size();
 	int min_w = min_size * im_scale_x;
 	int min_h = min_size * im_scale_y;
 
@@ -203,6 +227,7 @@ void Net<Dtype>::GetOutput(vector<pair<string, vector<Dtype> > >& boxes) {
 				_box.second.push_back(box[keep[j]].x2);
 				_box.second.push_back(box[keep[j]].y2);
 				_box.second.push_back(box[keep[j]].score);
+				LOG(INFO) << _box.first << ": " << box[keep[j]].x1 << " " << box[keep[j]].y1 << " " << box[keep[j]].x2 << " " << box[keep[j]].y2 << ": " << box[keep[j]].score;
 				boxes.push_back(_box);
 			}
 		}
@@ -389,12 +414,6 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
       for (int top_id = 0; top_id < top_id_vecs_[layer_id].size(); ++top_id) {
         blob_need_backward_[top_id_vecs_[layer_id][top_id]] = true;
       }
-    }
-
-    for (int param_id = 0; param_id < num_param_blobs; ++param_id) {
-      char filename[1024];
-      sprintf(filename, "%s_param%d", layer_names_[layer_id].c_str(), param_id);
-      layers_[layer_id]->LoggingData(filename, *layers_[layer_id]->blobs()[param_id].get());
     }
   }
   // Go through the net backwards to determine which blobs contribute to the

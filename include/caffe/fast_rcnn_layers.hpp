@@ -187,6 +187,34 @@ class ProposalLayer : public Layer<Dtype> {
   int num_anchors_;
 };
 
+template <typename Dtype>
+class ReproposalLayer : public Layer<Dtype> {
+ public:
+  explicit ReproposalLayer(const LayerParameter& param)
+      : Layer<Dtype>(param) {}
+  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top) {
+    //LOG(FATAL) << "Reshaping happens during the call to forward.";
+  }
+
+  virtual inline const char* type() const { return "ReproposalLayer"; }
+
+ protected:
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+	  LOG(FATAL) << "This layer does not propagate gradients.";
+  }
+
+  float nms_thresh_;
+  int min_size_;
+  float conf_thresh_;
+};
+
 }  // namespace caffe
 
 #endif  // CAFFE_FAST_RCNN_LAYERS_HPP_
