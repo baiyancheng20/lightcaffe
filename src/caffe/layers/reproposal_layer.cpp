@@ -37,7 +37,7 @@ static void _get_new_rois(const Blob<Dtype>& cls_prob, const Blob<Dtype>& bbox_p
 	const Dtype* bbox_pred_ = bbox_pred.cpu_data();
 	const Dtype* rois_ = rois.cpu_data();
 	new_rois.clear();
-	for (int i = 1; i < cls_prob.shape(1); i++) {
+	for (int i = 0; i < cls_prob.shape(1); i++) {
 		vector<BoundingBox<Dtype> > box(cls_prob.shape(0));
 		for (int j = 0; j < cls_prob.shape(0); j++) {
 			int rois_idx = j * 5;
@@ -66,7 +66,7 @@ static void _get_new_rois(const Blob<Dtype>& cls_prob, const Blob<Dtype>& bbox_p
 		_nms(keep, &num_out, sorted_dets, box.size(), 5, nms_thresh);
 
 		for (int j = 0; j < num_out; j++) {
-			if (box[keep[j]].score >= conf_thresh) {
+			if ((i > 0 && box[keep[j]].score > conf_thresh) || (i == 0 && box[keep[j]].score < 0.3f)) {
                                 vector<Dtype> new_roi;
 				new_roi.push_back(box[keep[j]].x1);
 				new_roi.push_back(box[keep[j]].y1);
@@ -80,6 +80,19 @@ static void _get_new_rois(const Blob<Dtype>& cls_prob, const Blob<Dtype>& bbox_p
 		free(keep);
 		free(sorted_dets);
 	}
+
+	if (new_rois.size() == 0) {
+		for (int j = 0; j < cls_prob.shape(0); ++j) {
+			vector<Dtype> new_roi;
+			new_roi.push_back(rois_[j * 5 + 1]);
+			new_roi.push_back(rois_[j * 5 + 2]);
+			new_roi.push_back(rois_[j * 5 + 3]);
+			new_roi.push_back(rois_[j * 5 + 4]);
+			new_roi.push_back(0.0f);
+			new_rois.push_back(new_roi);
+		}
+	}
+	LOG(INFO) << "# rois = " << new_rois.size();
 }
 
 template <typename Dtype>

@@ -209,10 +209,10 @@ void Net<Dtype>::GetOutput(vector<pair<string, vector<Dtype> > >& boxes) {
 		int num_out = 0;
 		float* sorted_dets = (float*)calloc(box.size() * 5, sizeof(float));
 		for (int j = 0; j < box.size(); j++) {
-			sorted_dets[j * 5 + 0] = box[j].x1 / im_scale_x;
-			sorted_dets[j * 5 + 1] = box[j].y1 / im_scale_y;
-			sorted_dets[j * 5 + 2] = box[j].x2 / im_scale_x;
-			sorted_dets[j * 5 + 3] = box[j].y2 / im_scale_y;
+			sorted_dets[j * 5 + 0] = box[j].x1;
+			sorted_dets[j * 5 + 1] = box[j].y1;
+			sorted_dets[j * 5 + 2] = box[j].x2;
+			sorted_dets[j * 5 + 3] = box[j].y2;
 			sorted_dets[j * 5 + 4] = box[j].score;
 		}
 
@@ -222,12 +222,12 @@ void Net<Dtype>::GetOutput(vector<pair<string, vector<Dtype> > >& boxes) {
 			if (box[keep[j]].score >= net_param().conf_thresh()) {
 				pair<string, vector<Dtype> > _box;
 				_box.first = net_param().class_name(i - 1);
-				_box.second.push_back(box[keep[j]].x1);
-				_box.second.push_back(box[keep[j]].y1);
-				_box.second.push_back(box[keep[j]].x2);
-				_box.second.push_back(box[keep[j]].y2);
+				_box.second.push_back(box[keep[j]].x1 / im_scale_x);
+				_box.second.push_back(box[keep[j]].y1 / im_scale_y);
+				_box.second.push_back(box[keep[j]].x2 / im_scale_x);
+				_box.second.push_back(box[keep[j]].y2 / im_scale_y);
 				_box.second.push_back(box[keep[j]].score);
-				LOG(INFO) << _box.first << ": " << box[keep[j]].x1 << " " << box[keep[j]].y1 << " " << box[keep[j]].x2 << " " << box[keep[j]].y2 << ": " << box[keep[j]].score;
+				LOG(INFO) << _box.first << ": " << _box.second[0] << " " << _box.second[1] << " " << _box.second[2] << " " << _box.second[3] << ", score = " << _box.second[4];
 				boxes.push_back(_box);
 			}
 		}
@@ -731,9 +731,11 @@ void Net<Dtype>::AppendParam(const NetParameter& param, const int layer_id,
   params_.push_back(layers_[layer_id]->blobs()[param_id]);
   param_id_vecs_[layer_id].push_back(net_param_id);
   param_layer_indices_.push_back(make_pair(layer_id, param_id));
+#ifndef RUN_TIME
   ParamSpec default_param_spec;
   const ParamSpec* param_spec = (layer_param.param_size() > param_id) ?
       &layer_param.param(param_id) : &default_param_spec;
+#endif
   if (!param_size || !param_name.size() || (param_name.size() &&
       param_names_index_.find(param_name) == param_names_index_.end())) {
     // This layer "owns" this parameter blob -- it is either anonymous
