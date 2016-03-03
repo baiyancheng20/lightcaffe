@@ -43,10 +43,10 @@ static void _get_new_rois(const Blob<Dtype>& cls_prob, const Blob<Dtype>& bbox_p
 			int rois_idx = j * 5;
 			int cls_prob_idx = j * cls_prob.shape(1) + i;
 			int bbox_pred_idx = j * bbox_pred.shape(1) + i * 4;
-			box[j].x1 = rois_[rois_idx + 1] / im_scale_x;
-			box[j].y1 = rois_[rois_idx + 2] / im_scale_y;
-			box[j].x2 = rois_[rois_idx + 3] / im_scale_x;
-			box[j].y2 = rois_[rois_idx + 4] / im_scale_y;
+			box[j].x1 = rois_[rois_idx + 1];
+			box[j].y1 = rois_[rois_idx + 2];
+			box[j].x2 = rois_[rois_idx + 3];
+			box[j].y2 = rois_[rois_idx + 4];
 			box[j].score = cls_prob_[cls_prob_idx];
 			box[j].transform_box(bbox_pred_[bbox_pred_idx + 0], bbox_pred_[bbox_pred_idx + 1], bbox_pred_[bbox_pred_idx + 2], bbox_pred_[bbox_pred_idx + 3], img_w, img_h, min_w, min_h);
 		}
@@ -56,10 +56,10 @@ static void _get_new_rois(const Blob<Dtype>& cls_prob, const Blob<Dtype>& bbox_p
 		int num_out = 0;
 		float* sorted_dets = (float*)calloc(box.size() * 5, sizeof(float));
 		for (int j = 0; j < box.size(); j++) {
-			sorted_dets[j * 5 + 0] = box[j].x1 * im_scale_x;
-			sorted_dets[j * 5 + 1] = box[j].y1 * im_scale_y;
-			sorted_dets[j * 5 + 2] = box[j].x2 * im_scale_x;
-			sorted_dets[j * 5 + 3] = box[j].y2 * im_scale_y;
+			sorted_dets[j * 5 + 0] = box[j].x1;
+			sorted_dets[j * 5 + 1] = box[j].y1;
+			sorted_dets[j * 5 + 2] = box[j].x2;
+			sorted_dets[j * 5 + 3] = box[j].y2;
 			sorted_dets[j * 5 + 4] = box[j].score;
 		}
 
@@ -68,10 +68,10 @@ static void _get_new_rois(const Blob<Dtype>& cls_prob, const Blob<Dtype>& bbox_p
 		for (int j = 0; j < num_out; j++) {
 			if (box[keep[j]].score >= conf_thresh) {
                                 vector<Dtype> new_roi;
-				new_roi.push_back(box[keep[j]].x1 * im_scale_x);
-				new_roi.push_back(box[keep[j]].y1 * im_scale_y);
-				new_roi.push_back(box[keep[j]].x2 * im_scale_x);
-				new_roi.push_back(box[keep[j]].y2 * im_scale_y);
+				new_roi.push_back(box[keep[j]].x1);
+				new_roi.push_back(box[keep[j]].y1);
+				new_roi.push_back(box[keep[j]].x2);
+				new_roi.push_back(box[keep[j]].y2);
 				new_roi.push_back(box[keep[j]].score);
 				new_rois.push_back(new_roi);
 			}
