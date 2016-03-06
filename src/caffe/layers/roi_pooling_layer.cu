@@ -91,6 +91,7 @@ void ROIPoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   CUDA_POST_KERNEL_CHECK;
 
   this->LoggingData("roipool_bottom0", *bottom[0]);
+  this->LoggingData("roipool_bottom1", *bottom[1]);
   this->LoggingData("roipool_top0", *top[0]);
 /*
   FILE* fp;
