@@ -31,11 +31,17 @@ void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   }
 
   if (this->layer_param_.convolution_param().logging()) {
-    this->LoggingData("conv_bottom0", *bottom[0]);
-    this->LoggingData("conv_param0", *this->blobs_[0]);
-    if (this->bias_term_)
-      this->LoggingData("conv_param1", *this->blobs_[1]);
-    this->LoggingData("conv_top0", *top[0]);
+    string layer_name = this->layer_param_.name();
+    string blob_name = layer_name + "_bottom0";
+    this->LoggingData(blob_name.c_str(), *bottom[0]);
+    blob_name = layer_name + "_param0";
+    this->LoggingData(blob_name.c_str(), *this->blobs_[0]);
+    if (this->bias_term_) {
+      blob_name = layer_name + "_param1";
+      this->LoggingData(blob_name.c_str(), *this->blobs_[1]);
+    }
+    blob_name = layer_name + "_top0";
+    this->LoggingData(blob_name.c_str(), *top[0]);
   }
 /*
     FILE* fp = fopen("../test/data/temp/conv_bottom0.txt", "w");
