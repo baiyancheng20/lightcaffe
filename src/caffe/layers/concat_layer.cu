@@ -43,6 +43,9 @@ void ConcatLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         top_concat_axis, bottom_concat_axis, offset_concat_axis, top_data);
     offset_concat_axis += bottom_concat_axis;
   }
+
+  string blob_name = this->layer_param_.name() + "_top0";
+  this->LoggingData(blob_name.c_str(), *top[0]);
 }
 
 template <typename Dtype>
