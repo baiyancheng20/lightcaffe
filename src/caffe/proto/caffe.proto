@@ -962,6 +962,8 @@ message ROIPoolingParameter {
   // Multiplicative spatial scale factor to translate ROI coords from their
   // input scale to the scale used when pooling
   optional float spatial_scale = 3 [default = 1];
+
+  optional bool logging = 4 [default = false];
 }
 
 // Message that stores parameters used by ProposalLayer

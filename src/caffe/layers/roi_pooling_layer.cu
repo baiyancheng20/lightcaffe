@@ -90,9 +90,15 @@ void ROIPoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       pooled_height_, pooled_width_, bottom_rois, top_data, argmax_data);
   CUDA_POST_KERNEL_CHECK;
 
-  this->LoggingData("roipool_bottom0", *bottom[0]);
-  this->LoggingData("roipool_bottom1", *bottom[1]);
-  this->LoggingData("roipool_top0", *top[0]);
+  if (this->layer_param_.roi_pooling_param().logging()) {
+    string layer_name = this->layer_param_.name();
+    string blob_name = layer_name + "_bottom0";
+    this->LoggingData(blob_name.c_str(), *bottom[0]);
+    blob_name = layer_name + "_bottom1";
+    this->LoggingData(blob_name.c_str(), *bottom[1]);
+    blob_name = layer_name + "_top0";
+    this->LoggingData(blob_name.c_str(), *top[0]);
+  }
 /*
   FILE* fp;
   const Dtype* data;
