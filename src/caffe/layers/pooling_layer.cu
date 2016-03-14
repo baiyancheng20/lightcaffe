@@ -213,8 +213,11 @@ void PoolingLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   CUDA_POST_KERNEL_CHECK;
 
   if (this->layer_param_.pooling_param().logging()) {
-    this->LoggingData("pool_bottom0", *bottom[0]);
-    this->LoggingData("pool_top0", *top[0]);
+    string layer_name = this->layer_param_.name();
+    string blob_name = layer_name + "_bottom0";
+    this->LoggingData(blob_name.c_str(), *bottom[0]);
+    blob_name = layer_name + "_top0";
+    this->LoggingData(blob_name.c_str(), *top[0]);
   }
 /*
 #ifdef LOGGING_BIN

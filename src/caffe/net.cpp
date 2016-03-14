@@ -92,10 +92,12 @@ void Net<Dtype>::Detect(const unsigned char* image_data, int width, int height, 
         }
       }
     }
-    for (int param_id = 0; param_id < layers_[layer_id]->blobs().size(); ++param_id) {
-      char filename[1024];
-      sprintf(filename, "%s_param%d", layer_names_[layer_id].c_str(), param_id);
-      layers_[layer_id]->LoggingData(filename, *layers_[layer_id]->blobs()[param_id].get());
+    if (net_param().logging()) {
+      for (int param_id = 0; param_id < layers_[layer_id]->blobs().size(); ++param_id) {
+        char filename[1024];
+        sprintf(filename, "%s_param%d", layer_names_[layer_id].c_str(), param_id);
+        layers_[layer_id]->LoggingData(filename, *layers_[layer_id]->blobs()[param_id].get());
+      }
     }
   }
   SetInput(image_data, width, height, stride);
@@ -171,20 +173,33 @@ void Net<Dtype>::SetInput(const unsigned char* image_data, int width, int height
 
 template <typename Dtype>
 void Net<Dtype>::GetOutput(vector<pair<string, vector<Dtype> > >& boxes) {
+  bool flag_twotimes = false;
+  for (int layer_id = 0; layer_id < layer_names_.size(); ++layer_id) {
+    const char* ln = layer_names_[layer_id].c_str();
+    if (ln[0] == 'n' && ln[1] == 'e' && ln[2] == 'w' && ln[3] == '_') {
+      flag_twotimes = true;
+      break;
+    }
+  }
+  string prefix = "";
+  if (flag_twotimes) {
+    prefix = "new_";
+  }
+
 	Blob<Dtype>& im_info = *blob_by_name("im_info");
 	const Dtype* im_info_ = im_info.cpu_data();
-	Blob<Dtype>& rois = *blob_by_name("new_rois");
+	Blob<Dtype>& rois = *blob_by_name(prefix + "rois");
 	const Dtype* rois_ = rois.cpu_data();
-	Blob<Dtype>& bbox_pred = *blob_by_name("new_bbox_pred");
+	Blob<Dtype>& bbox_pred = *blob_by_name(prefix + "bbox_pred");
 	const Dtype* bbox_pred_ = bbox_pred.cpu_data();
-	Blob<Dtype>& cls_prob = *blob_by_name("new_cls_prob");
+	Blob<Dtype>& cls_prob = *blob_by_name(prefix + "cls_prob");
 	const Dtype* cls_prob_ = cls_prob.cpu_data();
 
 	int img_w = im_info_[1];
 	int img_h = im_info_[0];
 	Dtype im_scale_x = im_info_[2];
 	Dtype im_scale_y = im_info_[3];
-	int min_size = layer_by_name("reproposal")->layer_param().proposal_param().min_size();
+	int min_size = layer_by_name("proposal")->layer_param().proposal_param().min_size();
 	int min_w = min_size * im_scale_x;
 	int min_h = min_size * im_scale_y;
 

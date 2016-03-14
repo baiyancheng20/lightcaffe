@@ -175,10 +175,17 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 		}
 	}
 
-        this->LoggingData("proposal_bottom0", *bottom[0]);
-        this->LoggingData("proposal_bottom1", *bottom[1]);
-        this->LoggingData("proposal_bottom2", *bottom[2]);
-        this->LoggingData("proposal_top0", *top[0]);
+        if (this->layer_param_.proposal_param().logging()) {
+          string layer_name = this->layer_param_.name();
+          string blob_name = layer_name + "_bottom0";
+          this->LoggingData(blob_name.c_str(), *bottom[0]);
+          blob_name = layer_name + "_bottom1";
+          this->LoggingData(blob_name.c_str(), *bottom[1]);
+          blob_name = layer_name + "_bottom2";
+          this->LoggingData(blob_name.c_str(), *bottom[2]);
+          blob_name = layer_name + "_top0";
+          this->LoggingData(blob_name.c_str(), *top[0]);
+        }
 /*
         FILE* fp;
         fp = fopen("../test/data/temp/proposal_bottom0.txt", "w");

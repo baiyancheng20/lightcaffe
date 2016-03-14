@@ -153,6 +153,7 @@ int test(const char* command) {
 			return -1;
 		}
 		test_image(caffe_net, image);
+		test_image(caffe_net, image);
 	}
 	else if (strcmp(command, "video") == 0) {
 		VideoCapture vc(boost::lexical_cast<int>(FLAGS_vid));

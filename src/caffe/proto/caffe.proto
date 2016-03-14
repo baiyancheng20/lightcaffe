@@ -101,6 +101,8 @@ message NetParameter {
   repeated string class_name = 204;
   optional float nms_thresh = 205 [default = 0.3];
   optional float conf_thresh = 206 [default = 0.8];
+
+  optional bool logging = 207 [default = false];
 }
 
 // NOTE
@@ -473,6 +475,8 @@ message ConcatParameter {
 
   // DEPRECATED: alias for "axis" -- does not support negative indexing.
   optional uint32 concat_dim = 1 [default = 1];
+
+  optional bool logging = 3 [default = false];
 }
 
 message BatchNormParameter {
@@ -977,6 +981,7 @@ message ProposalParameter {
   optional float nms_thresh = 7 [default = 0.7];
   optional uint32 min_size = 8 [default = 300];
   optional uint32 copys = 9 [default = 1];
+  optional bool logging = 10 [default = false];
 }
 
 message ReproposalParameter {
