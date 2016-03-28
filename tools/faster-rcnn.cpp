@@ -153,7 +153,12 @@ int test(const char* command) {
 			return -1;
 		}
 		test_image(caffe_net, image);
-		test_image(caffe_net, image);
+		Mat image2 = imread(FLAGS_img);
+		if (!image2.data) {
+			LOG(ERROR) << "Cannot open image: " << FLAGS_img;
+			return -1;
+		}
+		test_image(caffe_net, image2);
 	}
 	else if (strcmp(command, "video") == 0) {
 		VideoCapture vc(boost::lexical_cast<int>(FLAGS_vid));

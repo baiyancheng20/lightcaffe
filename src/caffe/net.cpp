@@ -124,14 +124,18 @@ void Net<Dtype>::SetInput(const unsigned char* image_data, int width, int height
   Dtype* data_ = data.mutable_cpu_data();
   for (int i = 0; i < resized_height; i++) {
     float y = i / im_scale_y;
-    int y0 = (int)floor(y);
-    int y1 = y0 + 1;
+    //int y0 = (int)floor(y);
+    //int y1 = y0 + 1;
+    int y0 = (int)y;
+    int y1 = std::min<int>(y0 + 1,  height - 1);
     float ay = y - y0;
     float by = 1 - ay;
     for (int j = 0; j < resized_width; j++) {
-      float x = j / im_scale_x;		
-      int x0 = (int)floor(x);			
-      int x1 = x0 + 1;
+      float x = j / im_scale_x;
+      //int x0 = (int)floor(x);
+      //int x1 = x0 + 1;
+      int x0 = (int)x;
+      int x1 = std::min<int>(x0 + 1,  width - 1);
       float ax = x - x0;
       float bx = 1 - ax;
 			
@@ -160,6 +164,11 @@ void Net<Dtype>::SetInput(const unsigned char* image_data, int width, int height
       data_[((0 * 3 + 0) * resized_height + i) *  resized_width + j] = B - net_param().mean_value(0);
       data_[((0 * 3 + 1) * resized_height + i) *  resized_width + j] = G - net_param().mean_value(1);
       data_[((0 * 3 + 2) * resized_height + i) *  resized_width + j] = R - net_param().mean_value(2);
+/*
+        printf("%d %d:  %d %d %d %d %f %f %f %f,  %d %d %d %d   %f %f %f,  %f %f %f\n", i, j, y0, y1, x0, x1, ay, by, ax, bx,
+              image_data[y1 * stride + x1 * 3], image_data[y0 * stride + x1 * 3], image_data[y1 * stride + x0 * 3], image_data[y0 * stride + x0 * 3],
+              B, G, R, data_[((0 * 3 + 0) * resized_height + i) *  resized_width + j], data_[((0 * 3 + 1) * resized_height + i) *  resized_width + j], data_[((0 * 3 + 2) * resized_height + i) *  resized_width + j]);
+*/
     }
   }
 
