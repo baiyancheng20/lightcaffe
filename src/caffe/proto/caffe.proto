@@ -891,6 +891,8 @@ message ReLUParameter {
     CUDNN = 2;
   }
   optional Engine engine = 2 [default = DEFAULT];
+
+  optional bool logging = 3 [default = false];
 }
 
 message ReshapeParameter {
@@ -1067,6 +1069,8 @@ message SoftmaxParameter {
   // from the end (e.g., -1 for the last axis).
   // Any other axes will be evaluated as independent softmaxes.
   optional int32 axis = 2 [default = 1];
+
+  optional bool logging = 3 [default = false];
 }
 
 message TanHParameter {

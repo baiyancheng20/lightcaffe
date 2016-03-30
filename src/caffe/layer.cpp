@@ -24,7 +24,7 @@ void Layer<Dtype>::Unlock() {
 }
 
 template <typename Dtype>
-void Layer<Dtype>::LoggingData(const char* blob_name, const Blob<Dtype>& blob) {
+void Layer<Dtype>::LoggingData(const char* blob_name, Blob<Dtype>& blob) {
   char filename[1024];
   sprintf(filename, "../test/data/temp/%s.bin", blob_name);
 
@@ -43,7 +43,8 @@ void Layer<Dtype>::LoggingData(const char* blob_name, const Blob<Dtype>& blob) {
     printf("[ERROR] Size mismatch! %d != %d\n", total_size, blob.count());
   }
 
-  fwrite(blob.cpu_data(), sizeof(Dtype), blob.count(), fp);
+  Dtype* data = blob.mutable_cpu_data();
+  fwrite(data, sizeof(Dtype), blob.count(), fp);
 
   fclose(fp);
 }

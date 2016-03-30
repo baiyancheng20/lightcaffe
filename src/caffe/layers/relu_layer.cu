@@ -30,6 +30,12 @@ void ReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   //     << " top_data: " << (unsigned long)top_data
   //     << " blocks: " << CAFFE_GET_BLOCKS(count)
   //     << " threads: " << CAFFE_CUDA_NUM_THREADS;
+
+  if (this->layer_param_.relu_param().logging()) {
+    string layer_name = this->layer_param_.name();
+    string blob_name = layer_name + "_top0";
+    this->LoggingData(blob_name.c_str(), *top[0]);
+  }
 }
 
 template <typename Dtype>

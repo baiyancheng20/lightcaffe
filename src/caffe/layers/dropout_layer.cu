@@ -46,6 +46,12 @@ void DropoutLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       caffe_gpu_scal<Dtype>(count, 1. / scale_, top_data);
     }
   }
+
+  if (this->layer_param_.dropout_param().logging()) {
+    string layer_name = this->layer_param_.name();
+    string blob_name = layer_name + "_top0";
+    this->LoggingData(blob_name.c_str(), *top[0]);
+  }
 }
 
 template <typename Dtype>

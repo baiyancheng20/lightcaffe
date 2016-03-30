@@ -118,6 +118,14 @@ void SoftmaxLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   kernel_channel_div<Dtype><<<CAFFE_GET_BLOCKS(count),
       CAFFE_CUDA_NUM_THREADS>>>(count, outer_num_, channels, inner_num_,
       scale_data, top_data);
+
+  if (this->layer_param_.softmax_param().logging()) {
+    string layer_name = this->layer_param_.name();
+    string blob_name = layer_name + "_bottom0";
+    this->LoggingData(blob_name.c_str(), *bottom[0]);
+    blob_name = layer_name + "_top0";
+    this->LoggingData(blob_name.c_str(), *top[0]);
+  }
 }
 
 template <typename Dtype>
