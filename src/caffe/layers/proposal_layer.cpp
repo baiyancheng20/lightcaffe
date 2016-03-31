@@ -49,11 +49,11 @@ static void _ratio_enum(const float anchor[], const vector<float>& ratios, vecto
 	_mkanchors(ws, hs, x_ctr, y_ctr, anchors);
 }
 
-static void _scale_enum(const float anchor[], const vector<float>& scales, vector<float>& anchors) {
+static void _scale_enum(const float anchor[], const float scales[], const int num_scales, vector<float>& anchors) {
 	float w, h, x_ctr, y_ctr;
 	_whctrs(anchor, w, h, x_ctr, y_ctr);
 	vector<float> ws, hs;
-	for (int i = 0; i < scales.size(); i++) {
+	for (int i = 0; i < num_scales; i++) {
 		ws.push_back(w * scales[i]);
 		hs.push_back(h * scales[i]);
 	}
@@ -64,8 +64,10 @@ static void generate_anchors(int base_size, const vector<float>& ratios, const v
 	float base_anchor[4] = { 0, 0, base_size - 1, base_size - 1 };
 	vector<float> ratio_anchors;
 	_ratio_enum(base_anchor, ratios, ratio_anchors);
-	for (int i = 0; i < ratio_anchors.size() / 4; i++) {
-		_scale_enum(&ratio_anchors[i * 4], scales, anchors);
+	for (int j = 0; j < scales.size(); j += ratios.size()) {
+		for (int i = 0; i < ratio_anchors.size() / 4; i++) {
+			_scale_enum(&ratio_anchors[i * 4], &scales[j], ratios.size(), anchors);
+		}
 	}
 }
 
@@ -186,62 +188,6 @@ void ProposalLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
           blob_name = layer_name + "_top0";
           this->LoggingData(blob_name.c_str(), *top[0]);
         }
-/*
-        FILE* fp;
-        fp = fopen("../test/data/temp/proposal_bottom0.txt", "w");
-        for (int k = 0; k < bottom[0]->count(); ++k)
-            fprintf(fp, "%.6f\n", scores[k]);
-        fclose(fp);
-        fp = fopen("../test/data/temp/proposal_bottom0.bin", "wb");
-        if (fwrite(scores, sizeof(Dtype), bottom[0]->count(), fp) != bottom[0]->count()) {
-          printf("Error while writing proposal_bottom0\n");
-        }
-        fclose(fp);
-        fp = fopen("../test/data/temp/proposal_bottom1.txt", "w");
-        for (int k = 0; k < bottom[1]->count(); ++k)
-            fprintf(fp, "%.6f\n", bbox_deltas[k]);
-        fclose(fp);
-        fp = fopen("../test/data/temp/proposal_bottom1.bin", "wb");
-        if (fwrite(bbox_deltas, sizeof(Dtype), bottom[1]->count(), fp) != bottom[1]->count()) {
-          printf("Error while writing proposal_bottom1\n");
-        }
-        fclose(fp);
-        fp = fopen("../test/data/temp/proposal_bottom2.txt", "w");
-        for (int k = 0; k < bottom[2]->count()+1; ++k)
-            fprintf(fp, "%.6f\n", im_info[k]);
-        fclose(fp);
-        fp = fopen("../test/data/temp/proposal_bottom2.bin", "wb");
-        if (fwrite(im_info, sizeof(Dtype), bottom[2]->count()+1, fp) != bottom[2]->count()+1) {
-          printf("Error while writing proposal_bottom2\n");
-        }
-        fclose(fp);
-        fp = fopen("../test/data/temp/proposal_top0.txt", "w");
-        for (int k = 0; k < nproposals; ++k) {
-          for (int i = 1; i < 5; ++i)
-            fprintf(fp, "%.6f ", top0[k * 5 + i]);
-          fprintf(fp, "\n");
-        }
-        fclose(fp);
-        fp = fopen("../test/data/temp/proposal_top0.bin", "wb");
-        if (fwrite(&nproposals, sizeof(int), 1, fp) != 1) {
-          printf("Error while writing proposal_top0_size\n");
-        }
-        if (fwrite(top0, sizeof(Dtype), nproposals * 5, fp) != nproposals * 5) {
-          printf("Error while writing proposal_top0\n");
-        }
-        fclose(fp);
-        fp = fopen("../test/data/temp/proposal_shapes.txt", "w");
-        fprintf(fp, "scores: %d %d %d\n", bottom[0]->channels(), bottom[0]->height(), bottom[0]->width());
-        fprintf(fp, "bboxes: %d %d %d\n", bottom[1]->channels(), bottom[1]->height(), bottom[1]->width());
-        fclose(fp);
-        fp = fopen("../test/data/temp/proposal_sorted.txt", "w");
-	for (int i = 0; i < proposals.size(); i++) {
-          fprintf(fp, "box %d (score=%.6f, %.2f x %.2f): %.2f %.2f %.2f %.2f\n",
-                  i, proposals[i].score, proposals[i].y2 - proposals[i].y1 + 1, proposals[i].x2 - proposals[i].x1 + 1,
-                  proposals[i].x1, proposals[i].y1, proposals[i].x2, proposals[i].y2);
-	}
-        fclose(fp);
-*/
 
 	free(keep);
 	free(sorted_dets);

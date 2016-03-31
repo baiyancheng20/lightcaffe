@@ -1,0 +1,2 @@
+#./build/tools/faster-rcnn snapshot -gpu 0 -model ../faster-rcnn/P_SRPN_MT_A9_PVANET7.1.1_rt.pt -weights ../faster-rcnn/P_SRPN_MT_A9_PVANET7.1.1_iter_600000.caffemodel -img ../test/data/voc/2007/VOC2007/JPEGImages/$1.jpg
+./build/tools/faster-rcnn snapshot -gpu 0 -model ../faster-rcnn/P_SRPN_MT_A9_PVANET7.1.1_rt_compressed.pt -weights ../faster-rcnn/P_SRPN_MT_A9_PVANET7.1.1_iter_600000_compressed.caffemodel -img ../test/data/voc/2007/VOC2007/JPEGImages/$1.jpg
