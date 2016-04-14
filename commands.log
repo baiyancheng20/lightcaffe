@@ -1,15 +1,12 @@
-./tools/train_faster_rcnn_alt_opt.py --net_name SRPN_PVANET7.1.1 --round 0 --weights models/SRPN_PVANET7.1.1/trainedModel/pvanet7.1.1_train_iter_900000.caffemodel --imdb pvtdb:vocmscoco:22 --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --iters 300000
-
-./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name SRPN_PVANET7.1.1 --round 0 --weights output/faster_rcnn_once_5anchors/pvtdb_vocmscoco_22/SRPN_PVANET7.1.1_faster_rcnn_once_iter_20000.caffemodel --siter 20000 --imdb pvtdb:vocmscoco:22 --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --iters 300000
-
 ./tools/train_faster_rcnn_alt_opt.py --gpu 1 --net_name SRPN_PVANET7.1.1_AUTO --round 0 --weights models/SRPN_PVANET7.1.1/trainedModel/pvanet7.1.1_train_iter_900000.caffemodel --imdb pvtdb:vocmscoco:22 --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --iters 4000000
 
 ./runtime/build/tools/faster-rcnn snapshot -gpu 0 -model SRPN_PVANET7.1.1_faster_rcnn_test_rt.pt -weights SRPN_PVANET7.1.1_faster_rcnn_once_iter_900000.caffemodel -img data/pvtdb/VOC2007/JPEGImages/000004.jpg
 
-./tools/test_net.py --gpu 0 --def models/SRPN_PVANET7.1.1_AUTO/faster_rcnn_once/faster_rcnn_test.pt --net output/faster_rcnn_once_5anchors/pvtdb_vocmscoco_22/SRPN_PVANET7.1.1_AUTO_faster_rcnn_once_iter_1200000.caffemodel --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --imdb pvtdb:voc2007test:20
-
-./tools/test_net.py --gpu 0 --def ../test/meta/pva/7.1.1/full/faster_rcnn_test_twotimes.pt --net output/faster_rcnn_once_5anchors/pvtdb_vocmscoco_22/SRPN_PVANET7.1.1_FT_faster_rcnn_once_iter_580000.caffemodel --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --imdb pvtdb:voc2007test:20
-
 ./tools/test_net.py --gpu 0 --def ../test/meta/pva/7.1.1/full/faster_rcnn_test_2.pt --net ../data/pva/7.1.1/full/SRPN_PVANET7.1.1_FT_faster_rcnn_once_iter_600000.caffemodel --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --imdb pvtdb:voc2007test:20
 
-./tools/train_faster_rcnn_alt_opt.py --gpu 1 --net_name GOOGLENET --round 0 --weights models/GOOGLENET/trainedModel/bvlc_googlenet.caffemodel --imdb pvtdb:vocmscoco:22 --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --iters 6000000
+./tools/test_net.py --gpu 1 --def models/GOOGLENET/faster_rcnn_once/faster_rcnn_test.pt --net output/faster_rcnn_once_25anc_plus/pvtdb_vocall_20_pva/GOOGLENET_faster_rcnn_once_iter_190000.caffemodel --cfg models/pva7.1.1_mod3/faster_rcnn_once_25anc_with_rand_scale.yml --imdb pvtdb:voc2007test:20
+
+./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name GOOGLENET --round 0 --weights models/GOOGLENET/trainedModel/bvlc_googlenet.caffemodel --imdb pvtdb:vocall:20 --cfg models/pva7.1.1_mod3/faster_rcnn_once_25anc_with_rand_scale.yml --iters 6000000
+
+./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name GOOGLENET --round 0 --snapshot output/faster_rcnn_once_25anc_plus/pvtdb_vocall_20_pva/GOOGLENET_faster_rcnn_once_iter_70000.state --imdb pvtdb:vocall:20 --cfg models/pva7.1.1_mod3/faster_rcnn_once_25anc_with_rand_scale.yml --iters 6000000
+
