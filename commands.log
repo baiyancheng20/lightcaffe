@@ -10,3 +10,13 @@
 
 ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name GOOGLENET --round 0 --snapshot output/faster_rcnn_once_25anc_plus/pvtdb_vocall_20_pva/GOOGLENET_faster_rcnn_once_iter_70000.state --imdb pvtdb:vocall:20 --cfg models/pva7.1.1_mod3/faster_rcnn_once_25anc_with_rand_scale.yml --iters 6000000
 
+./tools/train_faster_rcnn_alt_opt.py --gpu 1 --net_name pva7.3.0 --round 0 --weights models/pva7.3.0/pvanet7.3.0_train_iter_460000.caffemodel --imdb pvtdb:vocall:20 --cfg experiments/cfgs/faster_rcnn_once_25anc_with_rand_scale.yml --iters 6000000
+
+./caffe-fast-rcnn/build/tools/caffe test -gpu 0 -model models/pva7.3.0/pvanet7.3.0_test.pt -weights models/pva7.3.0/pvanet7.3.0_train_iter_460000.caffemodel -iterations 40000
+
+git config user.name "Kim, Kye-hyeon"
+git config user.email "kye-hyeon.kim@intel.com"
+git reset HEAD~1
+git commit -s -m ""
+git push origin HEAD:refs/for/master
+scp -p -P 29418 kyehyeon@10.225.21.11:hooks/commit-msg .git/hooks/
