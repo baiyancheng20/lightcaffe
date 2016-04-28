@@ -1,8 +1,4 @@
-./tools/train_faster_rcnn_alt_opt.py --gpu 1 --net_name SRPN_PVANET7.1.1_AUTO --round 0 --weights models/SRPN_PVANET7.1.1/trainedModel/pvanet7.1.1_train_iter_900000.caffemodel --imdb pvtdb:vocmscoco:22 --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --iters 4000000
-
 ./runtime/build/tools/faster-rcnn snapshot -gpu 0 -model SRPN_PVANET7.1.1_faster_rcnn_test_rt.pt -weights SRPN_PVANET7.1.1_faster_rcnn_once_iter_900000.caffemodel -img data/pvtdb/VOC2007/JPEGImages/000004.jpg
-
-./tools/test_net.py --gpu 0 --def ../test/meta/pva/7.1.1/full/faster_rcnn_test_2.pt --net ../data/pva/7.1.1/full/SRPN_PVANET7.1.1_FT_faster_rcnn_once_iter_600000.caffemodel --cfg experiments/cfgs/faster_rcnn_once_25anc.yml --imdb pvtdb:voc2007test:20
 
 ./tools/test_net.py --gpu 1 --def models/GOOGLENET/faster_rcnn_once/faster_rcnn_test.pt --net output/faster_rcnn_once_25anc_plus/pvtdb_vocall_20_pva/GOOGLENET_faster_rcnn_once_iter_190000.caffemodel --cfg models/pva7.1.1_mod3/faster_rcnn_once_25anc_with_rand_scale.yml --imdb pvtdb:voc2007test:20
 
@@ -13,6 +9,15 @@
 ./tools/train_faster_rcnn_alt_opt.py --gpu 1 --net_name pva7.3.0 --round 0 --weights models/pva7.3.0/pvanet7.3.0_train_iter_460000.caffemodel --imdb pvtdb:vocall:20 --cfg experiments/cfgs/faster_rcnn_once_25anc_with_rand_scale.yml --iters 6000000
 
 ./caffe-fast-rcnn/build/tools/caffe test -gpu 0 -model models/pva7.3.0/pvanet7.3.0_test.pt -weights models/pva7.3.0/pvanet7.3.0_train_iter_460000.caffemodel -iterations 40000
+
+./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name pva7.3.0 --round 0 --weights output/faster_rcnn_once_25anc_plus/pvtdb_vocall_20_pva/pva7.3.0_once_iter_2600000.caffemodel --imdb pvtdb:vocall:20 --cfg experiments/cfgs/faster_rcnn_once_25anc_with_rand_scale.yml --iters 6000000
+./tools/train_faster_rcnn_alt_opt.py --gpu 1 --net_name pva_inception --round 0 --snapshot output/faster_rcnn_once_25anc_plus/pvtdb_vocall_20_pva/pva_inception_once_iter_270000.state --imdb pvtdb:vocall:20 --cfg experiments/cfgs/faster_rcnn_once_25anc_with_rand_scale.yml --iters 6000000
+
+./caffe-fast-rcnn/build/tools/caffe train --gpu 0 --solver models/pva_inception2/solver_pva_inception2.pt --weights models/pva_inception2/pva_inception2_train_iter_140000.caffemodel
+
+./tools/test_net.py --gpu 0 --def models/pva_inception/faster_rcnn_once/faster_rcnn_train.pt --net output/faster_rcnn_once_25anc_plus/pvtdb_vocall_20_pva/pva_inception_once_iter_1100000.caffemodel --cfg models/pva7.1.1_mod3/faster_rcnn_once_25anc_with_rand_scale.yml --imdb pvtdb:voc2007test:20
+./tools/test_net.py --gpu 0 --def models/pva711/faster_rcnn_once/faster_rcnn_test.pt --net models/pva711/pva7.1.1_once_iter_760000.caffemodel --cfg models/pva7.1.1_mod3/faster_rcnn_once_25anc_with_rand_scale.yml --imdb pvtdb:voc2007test:20
+./tools/test_net.py --gpu 0 --def models/pva7.3.0/faster_rcnn_once/faster_rcnn_train.pt --net output/faster_rcnn_once_25anc_plus/pvtdb_vocall_20_pva/pva7.3.0_once_iter_2610000.caffemodel --cfg models/pva7.1.1_mod3/faster_rcnn_once_25anc_with_rand_scale.yml --imdb pvtdb:voc2007test:20
 
 git config user.name "Kim, Kye-hyeon"
 git config user.email "kye-hyeon.kim@intel.com"
